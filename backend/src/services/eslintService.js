@@ -1,6 +1,12 @@
-const { Linter } = require('eslint');
+let Linter = null;
+let linter = null;
 
-const linter = new Linter();
+try {
+  Linter = require('eslint').Linter;
+  linter = new Linter();
+} catch (err) {
+  console.warn('[eslintService] ESLint not available:', err.message);
+}
 
 // ESLint rules config
 const ESLINT_CONFIG = {
@@ -56,6 +62,7 @@ const ESLINT_CONFIG = {
 const SEVERITY_MAP = { 0: null, 1: 'warning', 2: 'critical' };
 
 function runESLint(code) {
+  if (!linter) return []; // ESLint unavailable (Vercel serverless)
   try {
     const messages = linter.verify(code, ESLINT_CONFIG, { filename: 'code.js' });
     return messages
